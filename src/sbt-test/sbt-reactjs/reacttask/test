@@ -1,0 +1,3 @@
+> package
+$ exists node_modules/react-tools/bin/jsx
+$ exists target/scala-2.10/classes/public/hello.js
