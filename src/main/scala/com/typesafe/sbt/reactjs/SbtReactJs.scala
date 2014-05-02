@@ -99,7 +99,7 @@ object SbtReactJs extends AutoPlugin {
     if (previousInfo != currentInfos) {
       lazy val changedFiles: Seq[File] = currentInfos.filter(e => !previousInfo.get(e._1).isDefined || previousInfo(e._1).lastModified < e._2.lastModified).map(_._1).toSeq ++ previousInfo.filter(e => !currentInfos.get(e._1).isDefined).map(_._1).toSeq
 
-      //erease dependencies that belong to changed files
+      //erase dependencies that belong to changed files
       val dependencies = previousRelation.filter((original, compiled) => changedFiles.contains(original))._2s
       dependencies.foreach(IO.delete)
 
@@ -157,23 +157,27 @@ object SbtReactJs extends AutoPlugin {
     reactJs := {
       val modules = Seq(baseDirectory.value / "node_modules").map(_.getCanonicalPath)
 
-      implicit val timeout = Timeout(reactTimeout.value)
-      val pendingExitValue = SbtWeb.withActorRefFactory(state.value, this.getClass.getName) {
-        arf =>
-          val to = new File(new File("target"), "webjars")
-          val cacheFile = new File(to, "extraction-cache")
-          val props = Trireme.props(stdEnvironment = NodeEngine.nodePathEnv(modules.to[immutable.Seq]))
-          val engine = arf.actorOf(props)
-          import ExecutionContext.Implicits.global
-          for (
-            result <- invokeJS(engine, NpmLoader.load(to, cacheFile, getClass.getClassLoader), Seq("install", "react-tools@" + reactVersion.value))
-          ) yield {
-            streams.value.log.info(s"Successfully installed react-tools@${reactVersion.value} via NPM.")
-            //new String(result.output.toArray, "UTF-8").split("\n").foreach(s => logger.info(s))
-            //new String(result.error.toArray, "UTF-8").split("\n").foreach(s => if (result.exitValue == 0) logger.info(s) else logger.error(s))
-          }
+      // TODO: May need to remove this later, just trying to speed things up for now.
+      if (!new File(JSX).exists()) {
+        streams.value.log.info(s"Fetching react-tools@${reactVersion.value}")
+        implicit val timeout = Timeout(reactTimeout.value)
+        val pendingExitValue = SbtWeb.withActorRefFactory(state.value, this.getClass.getName) {
+          arf =>
+            val to = new File(new File("target"), "webjars")
+            val cacheFile = new File(to, "extraction-cache")
+            val props = Trireme.props(stdEnvironment = NodeEngine.nodePathEnv(modules.to[immutable.Seq]))
+            val engine = arf.actorOf(props)
+            import ExecutionContext.Implicits.global
+            for (
+              result <- invokeJS(engine, NpmLoader.load(to, cacheFile, getClass.getClassLoader), Seq("install", "react-tools@" + reactVersion.value))
+            ) yield {
+              streams.value.log.info(s"Successfully installed react-tools@${reactVersion.value} via NPM.")
+              //new String(result.output.toArray, "UTF-8").split("\n").foreach(s => logger.info(s))
+              //new String(result.error.toArray, "UTF-8").split("\n").foreach(s => if (result.exitValue == 0) logger.info(s) else logger.error(s))
+            }
+        }
+        Await.result(pendingExitValue, timeout.duration)
       }
-      Await.result(pendingExitValue, timeout.duration)
     }
   )
 

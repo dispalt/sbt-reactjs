@@ -26,6 +26,8 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.0-M2a")
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3-M1")
 
+ScriptedPlugin.scriptedSettings
+
 scriptedBufferLog := false
 
 scriptedLaunchOpts <+= version apply { v => s"-Dproject.version=$v" }
