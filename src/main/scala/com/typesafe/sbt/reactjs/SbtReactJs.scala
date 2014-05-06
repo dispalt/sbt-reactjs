@@ -50,7 +50,9 @@ object SbtReactJs extends AutoPlugin {
   import autoImport._
   import JsTaskKeys._
 
-  final val JSX = "node_modules/react-tools/bin/jsx"
+  final val NODE_MODULES = "node_modules"
+  final val JSX = NODE_MODULES + "/react-tools/bin/jsx"
+
 
   override def requires = SbtJsTask
 
@@ -63,7 +65,7 @@ object SbtReactJs extends AutoPlugin {
 
   val naming: (String, Boolean) => String = (name, min) => name.replace(".jsx", if (min) ".min.js" else ".js")
 
-  def compile(file: File, state: State, path: File, timeout: FiniteDuration, options: Seq[String]): (String, Option[String], Seq[File]) = {
+  def compile(file: File, state: State, timeout: FiniteDuration, options: Seq[String]): (String, Option[String], Seq[File]) = {
     implicit val timeo = Timeout(timeout)
     val pendingExitValue = SbtWeb.withActorRefFactory(state, this.getClass.getName) {
       arf =>
@@ -91,7 +93,7 @@ object SbtReactJs extends AutoPlugin {
   }
 
   val CompileAssets =
-    (state, reactTimeout, sourceDirectory in Compile, resourceManaged in Compile, cacheDirectory, reactJs, jsxPath, options, entryPoints) map { (state, timeout, src, resources, cache, react, jsxPath, options, files) => {
+    (state, reactTimeout, sourceDirectory in Compile, resourceManaged in Compile, cacheDirectory, reactJs, options, entryPoints) map { (state, timeout, src, resources, cache, react, options, files) => {
     val watch: (File => PathFinder) = _ ** "*.jsx"
     val currentInfos = watch(src).get.map(f => f -> FileInfo.lastModified(f)).toMap
     val (previousRelation, previousInfo) = Sync.readInfo(cache)(FileInfo.lastModified.format)
@@ -106,7 +108,7 @@ object SbtReactJs extends AutoPlugin {
       val generated: Seq[(File, File)] = files.pair(relativeTo(Seq(src / "assets"))).flatMap {
         case (sourceFile, name) => {
           if (changedFiles.contains(sourceFile) || dependencies.contains(new File(resources, "public/" + naming(name, false)))) {
-            val (debug, min, dependencies) = compile(sourceFile, state, jsxPath, timeout, options)
+            val (debug, min, dependencies) = compile(sourceFile, state, timeout, options)
             val out = new File(resources, "public/" + naming(name, false))
             IO.write(out, debug)
             (dependencies ++ Seq(sourceFile)).toSet[File].map(_ -> out) ++ min.map {
@@ -155,7 +157,7 @@ object SbtReactJs extends AutoPlugin {
     resourceGenerators in Compile <+= CompileAssets,
 
     reactJs := {
-      val modules = Seq(baseDirectory.value / "node_modules").map(_.getCanonicalPath)
+      val modules = Seq(new File(NODE_MODULES)).map(_.getCanonicalPath)
 
       // TODO: May need to remove this later, just trying to speed things up for now.
       if (!new File(JSX).exists()) {
