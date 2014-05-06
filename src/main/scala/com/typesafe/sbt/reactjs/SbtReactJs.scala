@@ -25,8 +25,10 @@ import scala.util.control.Exception._
 
 object Import {
 
+  val reactJs = TaskKey[Unit]("reactjs", "Invoke the reactjs compiler.")
+
   object ReactJsKeys {
-    val reactJs = TaskKey[Unit]("reactjs", "Invoke the reactjs compiler.")
+
     val sourceMap = SettingKey[Boolean]("reactjs-source-map", "Outputs a v3 sourcemap.")
     val jsxPath = SettingKey[File]("reactjs-jsx-path", "The path to the jsx compiler")
     val reactVersion = SettingKey[String]("reactjs-version", "The version of react to fetch")
@@ -108,6 +110,7 @@ object SbtReactJs extends AutoPlugin {
       val generated: Seq[(File, File)] = files.pair(relativeTo(Seq(src / "assets"))).flatMap {
         case (sourceFile, name) => {
           if (changedFiles.contains(sourceFile) || dependencies.contains(new File(resources, "public/" + naming(name, false)))) {
+
             val (debug, min, dependencies) = compile(sourceFile, state, timeout, options)
             val out = new File(resources, "public/" + naming(name, false))
             IO.write(out, debug)
@@ -139,10 +142,8 @@ object SbtReactJs extends AutoPlugin {
 
   }
 
-  override def projectSettings = inTask(reactJs)(SbtJsTask.jsTaskSpecificUnscopedSettings) ++ Seq(
+  override def projectSettings = Seq(
     sourceMap := true,
-
-    shellFile := JSX,
 
     jsxPath := baseDirectory.value / JSX,
 
@@ -163,12 +164,16 @@ object SbtReactJs extends AutoPlugin {
       if (!new File(JSX).exists()) {
         streams.value.log.info(s"Fetching react-tools@${reactVersion.value}")
         implicit val timeout = Timeout(reactTimeout.value)
+
         val pendingExitValue = SbtWeb.withActorRefFactory(state.value, this.getClass.getName) {
           arf =>
             val to = new File(new File("target"), "webjars")
             val cacheFile = new File(to, "extraction-cache")
-            val props = Trireme.props(stdEnvironment = NodeEngine.nodePathEnv(modules.to[immutable.Seq]))
-            val engine = arf.actorOf(props)
+            val engineProps = SbtJsEngine.engineTypeToProps(
+              (engineType in reactJs).value,
+              NodeEngine.nodePathEnv(modules.to[immutable.Seq])
+            )
+            val engine = arf.actorOf(engineProps)
             import ExecutionContext.Implicits.global
             for (
               result <- invokeJS(engine, NpmLoader.load(to, cacheFile, getClass.getClassLoader), Seq("install", "react-tools@" + reactVersion.value))
