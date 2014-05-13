@@ -20,6 +20,7 @@ import scala.util.control.Exception._
 import com.typesafe.sbt.web.incremental.OpSuccess
 import spray.json._
 import DefaultJsonProtocol._
+import scala.collection.mutable.ListBuffer
 
 
 object Import {
@@ -34,6 +35,7 @@ object Import {
     val timeout = SettingKey[FiniteDuration]("reactjs-timeout", "How long before timing out JS runtime.")
     val tools = TaskKey[File]("reactjs-tools", "Install the ReactJS jsx compiler")
     val extension = SettingKey[String]("reactjs-extension", "The reactjs extension")
+    val harmony = SettingKey[Boolean]("reactjs-harmony", "Support harmony features.")
   }
 
 }
@@ -80,8 +82,9 @@ object SbtReactJs extends AutoPlugin {
     tools := toolsInstaller.value,
     taskMessage in Assets := "ReactJS compiling",
     taskMessage in TestAssets := "ReactJS test compiling",
+    harmony := false,
 
-  // Ripoff of the js source task from sbtjsengine
+    // Ripoff of the js source task from sbtjsengine
     reactJs in Assets := runCompiler(reactJs, Assets).dependsOn(webModules in Assets).dependsOn(tools).value,
     reactJs in TestAssets := runCompiler(reactJs, TestAssets).dependsOn(webModules in TestAssets).dependsOn(tools).value,
     resourceManaged in reactJs in Assets := webTarget.value / reactJs.key.label / "main",
@@ -163,21 +166,27 @@ object SbtReactJs extends AutoPlugin {
 
     val pendingExitValue = unManagedDirs.map {
       dir =>
+        val args = ListBuffer[String]()
+        args ++= Seq("--extension", extension.value)
+        if (harmony.value)
+           args += "--harmony"
+        args ++= Seq(dir.getCanonicalPath, (resourceManaged in task in config).value.getCanonicalPath)
+
         SbtWeb.withActorRefFactory(state.value, this.getClass.getName) {
           arf =>
             val engine = arf.actorOf(engineProps)
             for (
-              result <- invokeJS(engine, tools.value, Seq("--extension", extension.value, dir.getCanonicalPath, (resourceManaged in task in config).value.getCanonicalPath))
+              result <- invokeJS(engine, tools.value, args)
             ) yield {
               if (result.exitValue != 0) {
-                throw new RuntimeException(s"""Compilation failed: ${new String(result.error.toArray, "UTF-8")}.""")
+                throw new RuntimeException( s"""Compilation failed: ${new String(result.error.toArray, "UTF-8")}.""")
               }
               new String(result.output.toArray, "UTF-8")
             }
         }
     }
     val result = Await.result(Future.sequence(pendingExitValue), valTimeout.duration)
-    val filesChanged = result.map{
+    val filesChanged = result.map {
       str => str.parseJson.convertTo[List[String]]
     }.flatMap {
       str => str.map(f => (resourceManaged in task in config).value / (f + ".js"))
