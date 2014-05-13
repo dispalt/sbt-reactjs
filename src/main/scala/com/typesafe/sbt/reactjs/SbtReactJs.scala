@@ -5,36 +5,35 @@ import sbt._
 import sbt.Keys._
 import com.typesafe.jse._
 import scala.collection.immutable
-import com.typesafe.npm.{NpmLoader, Npm}
+import com.typesafe.npm.NpmLoader
+import com.typesafe.sbt.web.pipeline.Pipeline
 import akka.util.Timeout
 import scala.concurrent.{Future, ExecutionContext, Await}
-import com.typesafe.jse.Node
-import com.typesafe.sbt.web.SbtWeb
+import com.typesafe.sbt.web.{CompileProblems, incremental, SbtWeb}
 import scala.concurrent.duration._
-import scala.util.Try
 import com.typesafe.sbt.jse.{SbtJsEngine, SbtJsTask}
-import spray.json._
-import com.typesafe.sbt.jse.JsTaskImport.JsTaskKeys
 import com.typesafe.jse.Engine.JsExecutionResult
-import scala.collection.mutable.ListBuffer
 import akka.actor.ActorRef
 import akka.pattern.ask
 import play.core.jscompile.JavascriptCompiler.CompilationException
 import scala.util.control.Exception._
+import com.typesafe.sbt.web.incremental.OpSuccess
+import spray.json._
+import DefaultJsonProtocol._
 
 
 object Import {
 
-  val reactJs = TaskKey[Unit]("reactjs", "Invoke the reactjs compiler.")
+  val reactJs = TaskKey[Seq[File]]("reactjs", "Perform ReactJS JSX compilation on the asset pipeline.")
 
   object ReactJsKeys {
 
     val sourceMap = SettingKey[Boolean]("reactjs-source-map", "Outputs a v3 sourcemap.")
-    val jsxPath = SettingKey[File]("reactjs-jsx-path", "The path to the jsx compiler")
-    val reactVersion = SettingKey[String]("reactjs-version", "The version of react to fetch")
-    val entryPoints = SettingKey[PathFinder]("reactjs-entry-points")
+    val version = SettingKey[String]("reactjs-version", "The version of react to fetch")
     val options = SettingKey[Seq[String]]("reactjs-options")
-    val reactTimeout = SettingKey[FiniteDuration]("reactjs-timeout", "How long before timing out JS runtime.")
+    val timeout = SettingKey[FiniteDuration]("reactjs-timeout", "How long before timing out JS runtime.")
+    val tools = TaskKey[File]("reactjs-tools", "Install the ReactJS jsx compiler")
+    val extension = SettingKey[String]("reactjs-extension", "The reactjs extension")
   }
 
 }
@@ -43,17 +42,15 @@ object SbtReactJs extends AutoPlugin {
 
   val autoImport = Import
 
+  import autoImport.ReactJsKeys._
   import SbtWeb.autoImport._
   import WebKeys._
+  import SbtJsEngine.autoImport.JsEngineKeys._
   import SbtJsTask.autoImport.JsTaskKeys._
-  import autoImport.ReactJsKeys._
-  import SbtJsEngine.autoImport._
-  import JsEngineKeys._
   import autoImport._
-  import JsTaskKeys._
 
   final val NODE_MODULES = "node_modules"
-  final val JSX = NODE_MODULES + "/react-tools/bin/jsx"
+  final val JSX = NODE_MODULES + "/.bin/jsx"
 
 
   override def requires = SbtJsTask
@@ -61,131 +58,131 @@ object SbtReactJs extends AutoPlugin {
   override def trigger = AllRequirements
 
   private def invokeJS(engine: ActorRef, npmFile: File, args: Seq[String])
-                       (implicit timeout: Timeout): Future[JsExecutionResult] = {
+                      (implicit timeout: Timeout): Future[JsExecutionResult] = {
     (engine ? Engine.ExecuteJs(npmFile, args.to[immutable.Seq], timeout.duration)).mapTo[JsExecutionResult]
   }
 
-  val naming: (String, Boolean) => String = (name, min) => name.replace(".jsx", if (min) ".min.js" else ".js")
-
-  def compile(file: File, state: State, timeout: FiniteDuration, options: Seq[String]): (String, Option[String], Seq[File]) = {
-    implicit val timeo = Timeout(timeout)
-    val pendingExitValue = SbtWeb.withActorRefFactory(state, this.getClass.getName) {
-      arf =>
-        val props = Trireme.props()
-        val engine = arf.actorOf(props)
-        import ExecutionContext.Implicits.global
-        for (
-          result <- invokeJS(engine, new File(JSX), Seq(file.getCanonicalPath))
-        ) yield {
-          // TODO: We need to stream the output and error channels. The js engine needs to change in this regard so that the
-          // stdio sink and sources can be exposed through the NPM library and then adopted here.
-          //val logger = streams.log
-          //new String(result.output.toArray, "UTF-8").split("\n").foreach(s => logger.info(s))
-          //new String(result.error.toArray, "UTF-8").split("\n").foreach(s => if (result.exitValue == 0) logger.info(s) else logger.error(s))
-          if (result.exitValue == 0) {
-            val jsSource = new String(result.output.toArray, "UTF-8")
-            val minified = catching(classOf[CompilationException]).opt(play.core.jscompile.JavascriptCompiler.minify(jsSource, Some(file.getName())))
-            (jsSource, minified, Seq(file))
-          } else {
-            throw new Exception(new String(result.error.toArray, "UTF-8"))
-          }
-        }
-    }
-    Await.result(pendingExitValue, timeo.duration)
-  }
-
-  val CompileAssets =
-    (state, reactTimeout, sourceDirectory in Compile, resourceManaged in Compile, cacheDirectory, reactJs, options, entryPoints) map { (state, timeout, src, resources, cache, react, options, files) => {
-    val watch: (File => PathFinder) = _ ** "*.jsx"
-    val currentInfos = watch(src).get.map(f => f -> FileInfo.lastModified(f)).toMap
-    val (previousRelation, previousInfo) = Sync.readInfo(cache)(FileInfo.lastModified.format)
-
-    if (previousInfo != currentInfos) {
-      lazy val changedFiles: Seq[File] = currentInfos.filter(e => !previousInfo.get(e._1).isDefined || previousInfo(e._1).lastModified < e._2.lastModified).map(_._1).toSeq ++ previousInfo.filter(e => !currentInfos.get(e._1).isDefined).map(_._1).toSeq
-
-      //erase dependencies that belong to changed files
-      val dependencies = previousRelation.filter((original, compiled) => changedFiles.contains(original))._2s
-      dependencies.foreach(IO.delete)
-
-      val generated: Seq[(File, File)] = files.pair(relativeTo(Seq(src / "assets"))).flatMap {
-        case (sourceFile, name) => {
-          if (changedFiles.contains(sourceFile) || dependencies.contains(new File(resources, "public/" + naming(name, false)))) {
-
-            val (debug, min, dependencies) = compile(sourceFile, state, timeout, options)
-            val out = new File(resources, "public/" + naming(name, false))
-            IO.write(out, debug)
-            (dependencies ++ Seq(sourceFile)).toSet[File].map(_ -> out) ++ min.map {
-              minified =>
-                val outMin = new File(resources, "public/" + naming(name, true))
-                IO.write(outMin, minified)
-                (dependencies ++ Seq(sourceFile)).map(_ -> outMin)
-            }.getOrElse(Nil)
-          } else {
-            previousRelation.filter((original, compiled) => original == sourceFile)._2s.map(sourceFile -> _)
-          }
-        }
-      }
-      //write object graph to cache file
-      Sync.writeInfo(cache,
-        Relation.empty[File, File] ++ generated,
-        currentInfos)(FileInfo.lastModified.format)
-
-      // Return new files
-      generated.map(_._2).distinct.toList
-
-    } else {
-      // Return previously generated files
-      previousRelation._2s.toSeq
-    }
-  }
-
-
+  private def addUnscopedJsSourceFileTasks(sourceFileTask: TaskKey[Seq[File]]): Seq[Setting[_]] = {
+    Seq(
+      resourceGenerators <+= sourceFileTask,
+      managedResourceDirectories += (resourceManaged in sourceFileTask).value
+    )
   }
 
   override def projectSettings = Seq(
     sourceMap := true,
-
-    jsxPath := baseDirectory.value / JSX,
-
-    reactVersion := "0.10.0",
-
-    entryPoints <<= (sourceDirectory in Compile)(base => base / "assets" ** "*.jsx"),
-
+    version := "0.10.0",
+    extension := "jsx",
     options := Seq.empty[String],
+    timeout := 2.minutes,
+    excludeFilter in reactJs := HiddenFileFilter,
+    includeFilter in reactJs := GlobFilter("*.jsx"),
+    tools := toolsInstaller.value,
+    taskMessage in Assets := "ReactJS compiling",
+    taskMessage in TestAssets := "ReactJS test compiling",
 
-    reactTimeout := 2.minutes,
+  // Ripoff of the js source task from sbtjsengine
+    reactJs in Assets := runCompiler(reactJs, Assets).dependsOn(webModules in Assets).dependsOn(tools).value,
+    reactJs in TestAssets := runCompiler(reactJs, TestAssets).dependsOn(webModules in TestAssets).dependsOn(tools).value,
+    resourceManaged in reactJs in Assets := webTarget.value / reactJs.key.label / "main",
+    resourceManaged in reactJs in TestAssets := webTarget.value / reactJs.key.label / "test",
+    reactJs := (reactJs in Assets).value
+  ) ++
+    inConfig(Assets)(addUnscopedJsSourceFileTasks(reactJs)) ++
+    inConfig(TestAssets)(addUnscopedJsSourceFileTasks(reactJs))
 
-    resourceGenerators in Compile <+= CompileAssets,
+  private def toolsInstaller: Def.Initialize[Task[File]] = Def.task {
+    val modules = Seq(new File(NODE_MODULES)).map(_.getCanonicalPath)
+    val result = new File(JSX)
 
-    reactJs := {
-      val modules = Seq(new File(NODE_MODULES)).map(_.getCanonicalPath)
+    // TODO: May need to remove this later, just trying to speed things up for now.
+    if (!result.exists()) {
+      streams.value.log.info(s"Fetching react-tools@${version.value}")
+      implicit val valTimeout = Timeout(timeout.value)
 
-      // TODO: May need to remove this later, just trying to speed things up for now.
-      if (!new File(JSX).exists()) {
-        streams.value.log.info(s"Fetching react-tools@${reactVersion.value}")
-        implicit val timeout = Timeout(reactTimeout.value)
+      val pendingExitValue = SbtWeb.withActorRefFactory(state.value, this.getClass.getName) {
+        arf =>
+          val to = new File(new File("target"), "webjars")
+          val cacheFile = new File(to, "extraction-cache")
+          val npmFile = NpmLoader.load(to, cacheFile, getClass.getClassLoader)
+          val engineProps = SbtJsEngine.engineTypeToProps(
+            (engineType in reactJs).value,
+            Some(npmFile),
+            LocalEngine.nodePathEnv(modules.to[immutable.Seq])
+          )
+          val engine = arf.actorOf(engineProps)
+          import ExecutionContext.Implicits.global
+          for (
+            result <- invokeJS(engine, npmFile, Seq("install", s"react-tools@${version.value}"))
+          ) yield {
+            streams.value.log.info(s"Successfully installed react-tools@${version.value} via NPM.")
+            //new String(result.output.toArray, "UTF-8").split("\n").foreach(s => logger.info(s))
+            //new String(result.error.toArray, "UTF-8").split("\n").foreach(s => if (result.exitValue == 0) logger.info(s) else logger.error(s))
+          }
+      }
+      Await.result(pendingExitValue, valTimeout.duration)
+    }
+    result
+  }
 
-        val pendingExitValue = SbtWeb.withActorRefFactory(state.value, this.getClass.getName) {
+  private def runCompiler(task: TaskKey[Seq[File]],
+                          config: Configuration): Def.Initialize[Task[Seq[File]]] = Def.task {
+    val nodeModulePaths = (nodeModuleDirectories in Plugin).value.map(_.getCanonicalPath)
+
+    val sources = ((unmanagedSources in config).value ** ((includeFilter in task in config).value -- (excludeFilter in task in config).value)).get
+
+    val sortedUnManagedDirs = sources.filter(_.isDirectory).sortWith {
+      case (lhs, rhs) => lhs.getCanonicalPath.size < rhs.getCanonicalPath.size
+    }
+
+    val engineProps = SbtJsEngine.engineTypeToProps(
+      EngineType.Node, // TODO Work with other than node, not sure how to yet.
+      None,
+      LocalEngine.nodePathEnv(nodeModulePaths.to[immutable.Seq])
+    )
+
+    val unManagedDirs = sortedUnManagedDirs.foldLeft(Seq.empty[File]) {
+      (files, currentFile) =>
+        if (files.count {
+          file =>
+            currentFile.relativeTo(file).nonEmpty
+        } == 0) {
+          files ++ Seq(currentFile)
+        } else {
+          files
+        }
+    }
+    val logger: Logger = state.value.log
+
+    streams.value.log.info(s"${(taskMessage in task in config).value} on ${
+      unManagedDirs.size
+    } source directories.")
+
+    implicit val valTimeout = Timeout(timeout.value)
+    import ExecutionContext.Implicits.global
+
+    val pendingExitValue = unManagedDirs.map {
+      dir =>
+        SbtWeb.withActorRefFactory(state.value, this.getClass.getName) {
           arf =>
-            val to = new File(new File("target"), "webjars")
-            val cacheFile = new File(to, "extraction-cache")
-            val engineProps = SbtJsEngine.engineTypeToProps(
-              (engineType in reactJs).value,
-              NodeEngine.nodePathEnv(modules.to[immutable.Seq])
-            )
             val engine = arf.actorOf(engineProps)
-            import ExecutionContext.Implicits.global
             for (
-              result <- invokeJS(engine, NpmLoader.load(to, cacheFile, getClass.getClassLoader), Seq("install", "react-tools@" + reactVersion.value))
+              result <- invokeJS(engine, tools.value, Seq("--extension", extension.value, dir.getCanonicalPath, (resourceManaged in task in config).value.getCanonicalPath))
             ) yield {
-              streams.value.log.info(s"Successfully installed react-tools@${reactVersion.value} via NPM.")
-              //new String(result.output.toArray, "UTF-8").split("\n").foreach(s => logger.info(s))
-              //new String(result.error.toArray, "UTF-8").split("\n").foreach(s => if (result.exitValue == 0) logger.info(s) else logger.error(s))
+              if (result.exitValue != 0) {
+                throw new RuntimeException(s"""Compilation failed: ${new String(result.error.toArray, "UTF-8")}.""")
+              }
+              new String(result.output.toArray, "UTF-8")
             }
         }
-        Await.result(pendingExitValue, timeout.duration)
-      }
     }
-  )
+    val result = Await.result(Future.sequence(pendingExitValue), valTimeout.duration)
+    val filesChanged = result.map{
+      str => str.parseJson.convertTo[List[String]]
+    }.flatMap {
+      str => str.map(f => (resourceManaged in task in config).value / (f + ".js"))
+    }
+    filesChanged
+  }
 
 }

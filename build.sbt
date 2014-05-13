@@ -4,14 +4,16 @@ name := "sbt-reactjs"
 
 organization := "com.typesafe.sbt"
 
-version := "0.1.0-SNAPSHOT"
+version := "0.1.1-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 libraryDependencies ++= Seq(
-  "org.webjars" % "react" % "0.10.0"
+  "org.webjars" % "react" % "0.10.0",
+  "com.novocode" % "junit-interface" % "0.10" % "test",
+  "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 )
 
 resolvers ++= Seq(
@@ -22,9 +24,13 @@ resolvers ++= Seq(
   Resolver.mavenLocal
 )
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.0-M2a")
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.0-RC1")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3-M1")
+addSbtPlugin("com.typesafe.sbt" % "sbt-webdriver" % "1.0.0-RC1")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.0.0-RC1")
+
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.0-RC1")
 
 scriptedSettings
 

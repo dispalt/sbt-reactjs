@@ -1,3 +1,6 @@
-> package
-$ exists node_modules/react-tools/bin/jsx
-$ exists target/scala-2.10/classes/public/hello.js
+> reactjs-tools
+$ exists node_modules/.bin/jsx
+> assets
+$ pause
+$ exists target/web/reactjs/main/js/more.js
+$ exists target/web/reactjs/main/hello.js
