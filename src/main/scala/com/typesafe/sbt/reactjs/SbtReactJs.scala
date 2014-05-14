@@ -110,7 +110,7 @@ object SbtReactJs extends AutoPlugin {
           val npmFile = NpmLoader.load(to, cacheFile, getClass.getClassLoader)
           val engineProps = SbtJsEngine.engineTypeToProps(
             (engineType in reactJs).value,
-            Some(npmFile),
+            (command in reactJs).value,
             LocalEngine.nodePathEnv(modules.to[immutable.Seq])
           )
           val engine = arf.actorOf(engineProps)
@@ -132,39 +132,22 @@ object SbtReactJs extends AutoPlugin {
                           config: Configuration): Def.Initialize[Task[Seq[File]]] = Def.task {
     val nodeModulePaths = (nodeModuleDirectories in Plugin).value.map(_.getCanonicalPath)
 
-    val sources = ((unmanagedSources in config).value ** ((includeFilter in task in config).value -- (excludeFilter in task in config).value)).get
-
-    val sortedUnManagedDirs = sources.filter(_.isDirectory).sortWith {
-      case (lhs, rhs) => lhs.getCanonicalPath.size < rhs.getCanonicalPath.size
-    }
+    val sourceDirs = (unmanagedSourceDirectories in config).value
 
     val engineProps = SbtJsEngine.engineTypeToProps(
       EngineType.Node, // TODO Work with other than node, not sure how to yet.
-      None,
+      (command in reactJs).value,
       LocalEngine.nodePathEnv(nodeModulePaths.to[immutable.Seq])
     )
 
-    val unManagedDirs = sortedUnManagedDirs.foldLeft(Seq.empty[File]) {
-      (files, currentFile) =>
-        if (files.count {
-          file =>
-            currentFile.relativeTo(file).nonEmpty
-        } == 0) {
-          files ++ Seq(currentFile)
-        } else {
-          files
-        }
-    }
-    val logger: Logger = state.value.log
-
     streams.value.log.info(s"${(taskMessage in task in config).value} on ${
-      unManagedDirs.size
+      sourceDirs.size
     } source directories.")
 
     implicit val valTimeout = Timeout(timeout.value)
     import ExecutionContext.Implicits.global
 
-    val pendingExitValue = unManagedDirs.map {
+    val pendingExitValue = sourceDirs.map {
       dir =>
         val args = ListBuffer[String]()
         args ++= Seq("--extension", extension.value)

@@ -1,6 +1,5 @@
 > reactjs-tools
 $ exists node_modules/.bin/jsx
 > assets
-$ pause
 $ exists target/web/reactjs/main/js/more.js
 $ exists target/web/reactjs/main/hello.js
