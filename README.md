@@ -20,8 +20,7 @@ Right now it uses the `unmanagedSourceDirectories` as the source for the files
 to transform since the `jsx` compiler operates on directories.
 
 # TODO
-
-[ ] Host the artifacts
-[ ] Figure out how to reliably use JSX without npm install
+- [ ] Host the artifacts
+- [ ] Figure out how to reliably use JSX without npm install
 
 
