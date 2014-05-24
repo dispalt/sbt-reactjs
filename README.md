@@ -7,7 +7,7 @@ To use this plugin use the addSbtPlugin command within your project's
 plugins.sbt (or as a global setting) i.e.:
 
 ```scala
-addSbtPlugin("com.typesafe.sbt" % "sbt-reactjs" % "0.1.1-SNAPSHOT")
+addSbtPlugin("com.typesafe.sbt" % "sbt-reactjs" % "0.2.0-SNAPSHOT")
 ```
 
 Your project's build file also needs to enable sbt-web plugins. For example with build.sbt:
@@ -21,6 +21,7 @@ to transform since the `jsx` compiler operates on directories.
 
 # TODO
 - [ ] Host the artifacts
-- [ ] Figure out how to reliably use JSX without npm install
+- [x] Figure out how to reliably use JSX without npm install – built webjars
+  correctly.
 
 
