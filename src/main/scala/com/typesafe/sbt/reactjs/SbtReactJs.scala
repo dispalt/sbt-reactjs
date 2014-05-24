@@ -44,7 +44,6 @@ object Import {
     val version = SettingKey[String]("reactjs-version", "The version of react to fetch")
     val timeout = SettingKey[FiniteDuration]("reactjs-timeout", "How long before timing out JS runtime.")
     val tools = TaskKey[File]("reactjs-tools", "Install the ReactJS jsx compiler")
-    val extension = SettingKey[String]("reactjs-extension", "The reactjs extension")
     val harmony = SettingKey[Boolean]("reactjs-harmony", "Support harmony features.")
   }
 
@@ -71,7 +70,7 @@ object SbtReactJs extends AutoPlugin {
 
   val reactJsScriptUnscopedSettings = Seq(
 
-    includeFilter := extension.value,
+    includeFilter := "*.jsx",
 
     jsOptions := JsObject(
       "sourceMap" -> JsBoolean(sourceMap.value)
