@@ -1,7 +1,7 @@
 # ReactJS Source Compiler
 
 This plugin will help you compile JSX files during the asset compilation phase.
-It uses the autoPlugin feature with `0.13.5-RC1` of SBT to achieve that.
+It uses the autoPlugin feature with `0.13.5-RC3` of SBT to achieve that.
 
 To use this plugin use the addSbtPlugin command within your project's
 plugins.sbt (or as a global setting) i.e.:
@@ -21,7 +21,3 @@ to transform since the `jsx` compiler operates on directories.
 
 # TODO
 - [ ] Host the artifacts
-- [x] Figure out how to reliably use JSX without npm install – built webjars
-  correctly.
-
-
