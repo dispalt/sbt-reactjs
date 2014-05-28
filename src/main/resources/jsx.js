@@ -41,16 +41,9 @@
         var input = sourceFileMapping[0];
         var outputFile = sourceFileMapping[1].replace(".jsx", ".js");
         var output = path.join(target, outputFile);
-        var sourceMapOutput = output + ".map";
 
         fs.readFile(input, "utf8", function (e, contents) {
             throwIfErr(e);
-
-            if (options.sourceMap) {
-                options.filename = input;
-                options.generatedFile = path.basename(outputFile);
-                options.sourceFiles = [path.basename(input)];
-            }
 
             try {
                 var compileResult = jsx.transform(contents, options);
@@ -62,22 +55,15 @@
                     if (js === undefined) {
                         js = compileResult;
                     }
-                    if (options.sourceMap) {
-                        js = js + "\n//# sourceMappingURL=" + path.basename(sourceMapOutput) + "\n";
-                    }
 
                     fs.writeFile(output, js, "utf8", function (e) {
                         throwIfErr(e);
-
-                        if (options.sourceMap) {
-                            fs.writeFile(sourceMapOutput, compileResult.v3SourceMap, "utf8", throwIfErr);
-                        }
 
                         results.push({
                             source: input,
                             result: {
                                 filesRead: [input],
-                                filesWritten: options.sourceMap ? [output, sourceMapOutput] : [output]
+                                filesWritten: [output]
                             }
                         });
 

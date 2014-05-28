@@ -40,10 +40,7 @@ object Import {
 
   object ReactJsKeys {
 
-    val sourceMap = SettingKey[Boolean]("reactjs-source-map", "Outputs a v3 sourcemap.")
-    val version = SettingKey[String]("reactjs-version", "The version of react to fetch")
     val timeout = SettingKey[FiniteDuration]("reactjs-timeout", "How long before timing out JS runtime.")
-    val tools = TaskKey[File]("reactjs-tools", "Install the ReactJS jsx compiler")
     val harmony = SettingKey[Boolean]("reactjs-harmony", "Support harmony features.")
   }
 
@@ -73,12 +70,12 @@ object SbtReactJs extends AutoPlugin {
     includeFilter := "*.jsx",
 
     jsOptions := JsObject(
-      "sourceMap" -> JsBoolean(sourceMap.value)
+      "harmony" -> JsBoolean(harmony.value)
     ).toString()
   )
 
   override def projectSettings = Seq(
-    sourceMap := true
+    harmony := false
 
   ) ++ inTask(reactJs)(
     SbtJsTask.jsTaskSpecificUnscopedSettings ++
