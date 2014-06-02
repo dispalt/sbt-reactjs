@@ -1,5 +1,4 @@
-package com.typesafe.sbt.reactjs
-
+package com.github.ddispaltro.reactjs
 
 import sbt._
 import sbt.Keys._

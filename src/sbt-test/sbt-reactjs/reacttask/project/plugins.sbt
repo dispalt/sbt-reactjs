@@ -1,4 +1,4 @@
-addSbtPlugin("com.typesafe.sbt" % "sbt-reactjs" % sys.props("project.version"))
+addSbtPlugin("com.github.ddispaltro" % "sbt-reactjs" % sys.props("project.version"))
 
 resolvers ++= Seq(
   Resolver.mavenLocal,

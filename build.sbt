@@ -1,10 +1,12 @@
+import bintray.Keys._
+
 sbtPlugin := true
 
 name := "sbt-reactjs"
 
-organization := "com.typesafe.sbt"
+organization := "com.github.ddispaltro"
 
-version := "0.2.0-SNAPSHOT"
+version := "0.2.0"
 
 scalaVersion := "2.10.4"
 
@@ -28,48 +30,30 @@ resolvers ++= Seq(
   Resolver.mavenLocal
 )
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.0-RC2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-webdriver" % "1.0.0-RC2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-webdriver" % "1.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.0.0-RC2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.0.0")
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.0-RC2")
 
-publishMavenStyle := true
-
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value)
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-}
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
 publishArtifact in Test := false
 
 pomIncludeRepository := { _ => false }
 
-pomExtra := <url>https://github.com/ddispaltro/sbt-reactjs</url>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <url>git@github.com:ddispaltro/sbt-reactjs.git</url>
-    <connection>scm:git:git@github.com:ddispaltro/sbt-reactjs.git</connection>
-  </scm>
-  <developers>
-    <developer>
-      <id>ddispaltro</id>
-      <name>Dan Di Spaltro</name>
-      <url>http://twitter.com/dispalt</url>
-    </developer>
-  </developers>
+// Bintray settings
+publishMavenStyle := false
 
+bintrayPublishSettings
+
+repository in bintray := "sbt-plugins"
+
+bintrayOrganization in bintray := None
+
+// Scripted testing config
 scriptedSettings
 
 scriptedBufferLog := false
