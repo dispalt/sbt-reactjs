@@ -21,7 +21,8 @@ lazy val root = (project in file(".")).enablePlugins(SbtWeb)
 Right now the only option is to use `harmony` similar to the jsx compiler.
 
 The artifact is hosted as part of the [community plugins](http://www.scala-sbt.org/0.13.5/docs/Community/Bintray-For-Plugins.html)
-via [bintray service](https://bintray.com/ddispaltro/sbt-plugins/sbt-reactjs/view)
+via [bintray service](https://bintray.com/ddispaltro/sbt-plugins/sbt-reactjs/view). **Right now the hosting seems broken**
+
 
 # License
 
