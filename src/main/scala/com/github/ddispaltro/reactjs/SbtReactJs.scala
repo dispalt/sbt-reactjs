@@ -56,10 +56,6 @@ object SbtReactJs extends AutoPlugin {
   import SbtJsTask.autoImport.JsTaskKeys._
   import autoImport._
 
-  final val NODE_MODULES = "node_modules"
-  final val JSX = NODE_MODULES + "/.bin/jsx"
-
-
   override def requires = SbtJsTask
 
   override def trigger = AllRequirements

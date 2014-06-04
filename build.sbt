@@ -6,7 +6,7 @@ name := "sbt-reactjs"
 
 organization := "com.github.ddispaltro"
 
-version := "0.2.0"
+version := "0.2.1-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
@@ -36,7 +36,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-webdriver" % "1.0.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.0.0")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.0-RC2")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.0")
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
