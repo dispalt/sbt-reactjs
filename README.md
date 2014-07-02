@@ -7,7 +7,7 @@ To use this plugin use the addSbtPlugin command within your project's
 plugins.sbt (or as a global setting) i.e.:
 
 ```scala
-addSbtPlugin("com.github.ddispaltro" % "sbt-reactjs" % "0.2.1-SNAPSHOT")
+addSbtPlugin("com.github.ddispaltro" % "sbt-reactjs" % "0.2.2")
 ```
 
 Your project's build file also needs to enable sbt-web plugins. For example with build.sbt:
@@ -21,7 +21,7 @@ lazy val root = (project in file(".")).enablePlugins(SbtWeb)
 Right now the only option is to use `harmony` similar to the jsx compiler.
 
 The artifact is hosted as part of the [community plugins](http://www.scala-sbt.org/0.13.5/docs/Community/Bintray-For-Plugins.html)
-via [bintray service](https://bintray.com/ddispaltro/sbt-plugins/sbt-reactjs/view). **Right now the hosting seems broken**
+via [bintray service](https://bintray.com/ddispaltro/sbt-plugins/sbt-reactjs/view).
 
 
 # License
