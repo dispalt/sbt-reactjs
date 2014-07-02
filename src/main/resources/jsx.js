@@ -75,9 +75,9 @@
                 problems.push({
                     message: err.message,
                     severity: "error",
-                    lineNumber: err.location.first_line,
-                    characterOffset: err.location.first_column,
-                    lineContent: contents.split("\n")[err.location.first_line],
+                    lineNumber: err.lineNumber,
+                    characterOffset: err.column - 1,
+                    lineContent: contents.split("\n")[err.lineNumber - 1],
                     source: input
                 });
                 results.push({
