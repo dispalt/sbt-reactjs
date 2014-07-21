@@ -6,7 +6,7 @@ name := "sbt-reactjs"
 
 organization := "com.github.ddispaltro"
 
-version := "0.2.2"
+version := "0.3-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
