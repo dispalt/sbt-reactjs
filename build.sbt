@@ -13,13 +13,13 @@ scalaVersion := "2.10.4"
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 libraryDependencies ++= Seq(
-  "org.webjars" % "react" % "0.10.0-1",
+  "org.webjars" % "react" % "0.11.0",
   "org.webjars" % "jstransform" % "5.0.0",
   "org.webjars" % "esprima" % "4001.1.0-dev-harmony-fb",
   "org.webjars" % "base62js" % "707ebd9e05",
   "org.webjars" % "mkdirp" % "0.3.5",
   "com.novocode" % "junit-interface" % "0.10" % "test",
-  "org.scalatest" %% "scalatest" % "2.1.5" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 )
 
 resolvers ++= Seq(
@@ -30,13 +30,13 @@ resolvers ++= Seq(
   Resolver.mavenLocal
 )
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-webdriver" % "1.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.0.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.0.2")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.0")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.2")
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
@@ -58,4 +58,4 @@ scriptedSettings
 
 scriptedBufferLog := false
 
-scriptedLaunchOpts <+= version apply { v => s"-Dproject.version=$v" }
+scriptedLaunchOpts += s"-Dproject.version=${version.value}"
