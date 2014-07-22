@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
 var MoreMessage = React.createClass({
-  render: function() {
-    return <div>Hello {this.props.name}</div>;
+  render () {
+    return <div>{this.props.names.map((name) => <span>{name}</span>)}</div>;
   }
 });
 
-React.renderComponent(<MoreMessage name="John" />, mountNode);
+React.renderComponent(<MoreMessage names={["John", "Mary"]} />, mountNode);
