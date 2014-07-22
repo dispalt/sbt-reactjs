@@ -14,7 +14,6 @@ import com.typesafe.sbt.jse.{SbtJsEngine, SbtJsTask}
 import com.typesafe.jse.Engine.JsExecutionResult
 import akka.actor.ActorRef
 import akka.pattern.ask
-import play.core.jscompile.JavascriptCompiler.CompilationException
 import scala.util.control.Exception._
 import com.typesafe.sbt.web.incremental.{OpInputHasher, OpInputHash, OpSuccess}
 import spray.json._
