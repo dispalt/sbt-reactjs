@@ -1,5 +1,7 @@
 # ReactJS Source Compiler
 
+![Build Status](https://travis-ci.org/ddispaltro/sbt-reactjs.svg?branch=master)
+
 This plugin hooks your JSX files in to the Asset compilation phase.
 It uses the autoPlugin feature with `0.13.5` to make the setup dead-simple.
 
@@ -16,7 +18,7 @@ Your project's build file also needs to enable sbt-web plugins. For example with
 lazy val root = (project in file(".")).enablePlugins(SbtWeb)
 ```
 
-# Options
+## Options
 
  - `harmony`: Turns on JS transformations such as ES6 Classes etc.
  - `sourceMapInline`: Embed inline sourcemap in transformed source
@@ -25,6 +27,6 @@ The artifact is hosted as part of the [community plugins](http://www.scala-sbt.o
 via [bintray service](https://bintray.com/ddispaltro/sbt-plugins/sbt-reactjs/view).
 
 
-# License
+## License
 
-This software is Apache 2 licensed.
+`sbt-reactjs` is licensed under the [Apache License, Version 2.0](./LICENSE)
