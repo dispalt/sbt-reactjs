@@ -1,3 +1,4 @@
 > assets
 $ exists target/web/reactjs/main/js/more.js
 $ exists target/web/reactjs/main/hello.js
+$ must-mirror target/web/reactjs/main/js/more.js out/more.js

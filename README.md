@@ -18,7 +18,8 @@ lazy val root = (project in file(".")).enablePlugins(SbtWeb)
 
 # Options
 
-Right now the only option is to use `harmony` similar to the jsx compiler.
+ - `harmony`: Turns on JS transformations such as ES6 Classes etc.
+ - `sourceMapInline`: Embed inline sourcemap in transformed source
 
 The artifact is hosted as part of the [community plugins](http://www.scala-sbt.org/0.13.5/docs/Community/Bintray-For-Plugins.html)
 via [bintray service](https://bintray.com/ddispaltro/sbt-plugins/sbt-reactjs/view).
