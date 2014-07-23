@@ -2,6 +2,9 @@
 
 ![Build Status](https://travis-ci.org/ddispaltro/sbt-reactjs.svg?branch=master)
 
+ - The master and 0.3.x series is for React 0.11
+ - The [0.2.x](https://github.com/ddispaltro/sbt-reactjs/tree/0.2.x) series is for React 0.10
+
 This plugin hooks your JSX files in to the Asset compilation phase.
 It uses the autoPlugin feature with `0.13.5` to make the setup dead-simple.
 
