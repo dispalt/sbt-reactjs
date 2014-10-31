@@ -2,7 +2,8 @@
 
 ![Build Status](https://travis-ci.org/ddispaltro/sbt-reactjs.svg?branch=master)
 
- - The master and 0.3.x series is for React 0.11
+ - The master and 0.4.x series is for React 0.12
+ - The [0.3.x](https://github.com/ddispaltro/sbt-reactjs/tree/0.3.x) series is for React 0.11
  - The [0.2.x](https://github.com/ddispaltro/sbt-reactjs/tree/0.2.x) series is for React 0.10
 
 This plugin hooks your JSX files in to the Asset compilation phase.
@@ -24,6 +25,7 @@ lazy val root = (project in file(".")).enablePlugins(SbtWeb)
 ## Options
 
  - `harmony`: Turns on JS transformations such as ES6 Classes etc.
+ - `stripTypes`: Strips out type annotations.
  - `sourceMapInline`: Embed inline sourcemap in transformed source
 
 The artifact is hosted as part of the [community plugins](http://www.scala-sbt.org/0.13.5/docs/Community/Bintray-For-Plugins.html)
