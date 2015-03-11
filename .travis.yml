@@ -1,3 +1,23 @@
+# Use container-based infrastructure
+sudo: false
+
 jdk: oraclejdk7
+
 language: scala
-script: sbt scripted
+
+# These directories are cached to S3 at the end of the build
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
+
+scala:
+  - 2.10.5
+  - 2.11.6
+
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M scripted
+
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
