@@ -6,16 +6,16 @@ name := "sbt-reactjs"
 
 organization := "com.github.ddispaltro"
 
-version := "0.4.1"
+version := "0.5.0-SNAPSHOT"
 
 scalaVersion := "2.10.5"
 
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 libraryDependencies ++= Seq(
-  "org.webjars" % "react" % "0.12.2",
-  "org.webjars" % "jstransform" % "7.0.0",
-  "org.webjars" % "esprima" % "6001.1001.0000-dev-harmony-fb",
+  "org.webjars" % "react" % "0.13.0",
+  "org.webjars" % "jstransform" % "10.1.0",
+  "org.webjars" % "esprima" % "13001.1.0-dev-harmony-fb",
   "org.webjars" % "base62js" % "1.0.0",
   "org.webjars" % "source-map" % "0.1.40-1",
   "org.webjars" % "mkdirp" % "0.5.0"
