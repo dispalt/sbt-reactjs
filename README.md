@@ -2,7 +2,8 @@
 
 ![Build Status](https://travis-ci.org/ddispaltro/sbt-reactjs.svg?branch=master)
 
- - The master and 0.4.x series is for React 0.12
+ - The master and 0.5.x series is for React 0.13
+ - The [0.4.x](https://github.com/ddispaltro/sbt-reactjs/tree/0.4.x) series is for React 0.12
  - The [0.3.x](https://github.com/ddispaltro/sbt-reactjs/tree/0.3.x) series is for React 0.11
  - The [0.2.x](https://github.com/ddispaltro/sbt-reactjs/tree/0.2.x) series is for React 0.10
 
@@ -13,7 +14,7 @@ To use this plugin use the addSbtPlugin command within your project's
 plugins.sbt (or as a global setting) i.e.:
 
 ```scala
-addSbtPlugin("com.github.ddispaltro" % "sbt-reactjs" % "0.4.0")
+addSbtPlugin("com.github.ddispaltro" % "sbt-reactjs" % "0.5.0")
 ```
 
 Your project's build file also needs to enable sbt-web plugins. For example with build.sbt:
