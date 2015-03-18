@@ -40,6 +40,7 @@ object Import {
 
     val timeout         = SettingKey[FiniteDuration]("reactjs-timeout", "How long before timing out JS runtime.")
     val harmony         = SettingKey[Boolean]("reactjs-harmony", "Support harmony features.")
+    val es6module       = SettingKey[Boolean]("reactjs-es6module", "Support ES6 modules.")
     val stripTypes      = SettingKey[Boolean]("reactjs-strip-types", "Strips out type annotations.")
     val sourceMapInline = SettingKey[Boolean]("reactjs-source-map-inline", "Embed inline sourcemap in transformed source.")
   }
@@ -67,6 +68,7 @@ object SbtReactJs extends AutoPlugin {
 
     jsOptions := JsObject(
       "harmony" -> JsBoolean(harmony.value),
+      "es6module" → JsBoolean(es6module.value),
       "stripTypes" -> JsBoolean(stripTypes.value),
       "sourceMap" -> JsBoolean(sourceMapInline.value)
     ).toString()
@@ -74,6 +76,7 @@ object SbtReactJs extends AutoPlugin {
 
   override def projectSettings = Seq(
     harmony := false,
+    es6module := false,
     stripTypes := false,
     sourceMapInline := false
   ) ++ inTask(reactJs)(
