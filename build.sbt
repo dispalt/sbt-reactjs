@@ -8,8 +8,6 @@ organization := "com.github.ddispaltro"
 
 version := "0.5.1"
 
-scalaVersion := "2.10.5"
-
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 libraryDependencies ++= Seq(
@@ -20,8 +18,6 @@ libraryDependencies ++= Seq(
   "org.webjars" % "source-map" % "0.1.40-1",
   "org.webjars" % "mkdirp" % "0.5.0"
 )
-
-resolvers += "Typesafe Releases Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.2")
 
