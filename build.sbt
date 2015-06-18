@@ -13,7 +13,7 @@ scalaVersion := "2.10.5"
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 libraryDependencies ++= Seq(
-  "org.webjars" % "react" % "0.13.0",
+  "org.webjars" % "react" % "0.13.3",
   "org.webjars" % "jstransform" % "10.1.0",
   "org.webjars" % "esprima" % "13001.1.0-dev-harmony-fb",
   "org.webjars" % "base62js" % "1.0.0",
