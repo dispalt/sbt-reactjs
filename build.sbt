@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "mkdirp" % "0.5.0"
 )
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.3")
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
