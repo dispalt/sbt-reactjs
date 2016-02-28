@@ -4,4 +4,4 @@ export var MoreMessage = React.createClass({
   }
 });
 
-React.render(<MoreMessage name="John" />, mountNode);
+ReactDOM.render(<MoreMessage name="John" />, mountNode);

@@ -5,4 +5,4 @@ export var MoreMessage = React.createClass({
   }
 });
 
-React.render(<MoreMessage names={["John", "Mary"]} />, mountNode);
+ReactDOM.render(<MoreMessage names={["John", "Mary"]} />, mountNode);

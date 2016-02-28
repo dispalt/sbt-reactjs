@@ -4,4 +4,4 @@ class HelloMessage extends React.Component {
     }
 }
 
-React.render(<HelloMessage name="John" />, mountNode);
+ReactDOM.render(<HelloMessage name="John" />, mountNode);
