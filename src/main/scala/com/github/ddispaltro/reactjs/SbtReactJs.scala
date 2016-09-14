@@ -80,7 +80,7 @@ object SbtReactJs extends AutoPlugin {
     stripTypes := false,
     sourceMapInline := false
   ) ++ inTask(reactJs)(
-    SbtJsTask.jsTaskSpecificUnscopedSettings ++
+    SbtJsTask.jsTaskSpecificUnscopedProjectSettings ++
       inConfig(Assets)(reactJsScriptUnscopedSettings) ++
       inConfig(TestAssets)(reactJsScriptUnscopedSettings) ++
       Seq(
