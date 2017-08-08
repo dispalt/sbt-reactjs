@@ -9,7 +9,7 @@ organization := "com.github.ddispaltro"
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 libraryDependencies ++= Seq(
-  "org.webjars" % "react" % "0.14.8",
+  "org.webjars" % "react" % "15.2.1",
   "org.webjars.npm" % "react-tools" % "0.13.3",
   "org.webjars" % "jstransform" % "10.1.0",
   "org.webjars" % "esprima" % "13001.1.0-dev-harmony-fb",
@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
   "org.webjars" % "mkdirp" % "0.5.0"
 )
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.3")
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.4")
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
