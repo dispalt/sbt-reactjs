@@ -1,6 +1,4 @@
-//import bintray.BintrayKeys._
 
-//scalaVersion := "2.12.4"
 
 sbtPlugin := true
 
@@ -23,19 +21,16 @@ libraryDependencies ++= Seq(
   "org.webjars.npm" % "minimatch" % "3.0.4"
 )
 
-//addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.2.2")
 addSbtJsEngine("1.2.2")
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 
 pomIncludeRepository := { _ => false }
 
-// Bintray settings
+
 publishMavenStyle := false
 
+// Bintray settings
+bintrayRepository in bintray := "sbt-plugins"
 //TODO: ADD again
-//bintrayPublishSettings
-//TODO: ADD again
-//repository in bintray := "sbt-plugins"
-//TODO: ADD again
-//bintrayOrganization in bintray := None
+bintrayOrganization in bintray := None
