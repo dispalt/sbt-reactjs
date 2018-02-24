@@ -32,5 +32,9 @@ publishMavenStyle := false
 
 // Bintray settings
 bintrayRepository in bintray := "sbt-plugins"
-//TODO: ADD again
 bintrayOrganization in bintray := None
+
+scriptedLaunchOpts := { scriptedLaunchOpts.value ++
+  Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
+}
+scriptedBufferLog := false
