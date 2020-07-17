@@ -83,7 +83,7 @@ object SbtReactJs extends AutoPlugin {
   override def buildSettings = inTask(reactJs)(
     SbtJsTask.jsTaskSpecificUnscopedBuildSettings ++ Seq(
       moduleName := "reactjs",
-      shellFile := getClass.getClassLoader.getResource("jsx.js"),
+      shellFile := getClass.getClassLoader.getResource("jsx.js")
     )
   )
 

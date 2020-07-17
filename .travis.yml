@@ -1,4 +1,11 @@
-jdk: oraclejdk7
+jdk: openjdk8
 language: scala
+scala:
+  - 2.12.11
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+
 script:
   - sbt test scripted
