@@ -1,6 +1,6 @@
 # ReactJS Source Compiler
 
-![Build Status](https://travis-ci.org/ddispaltro/sbt-reactjs.svg?branch=master)
+![Scala CI](https://github.com/dispalt/sbt-reactjs/workflows/Scala%20CI/badge.svg)
 
  - The master series is for React 0.14.x
  - The [0.4.x](https://github.com/ddispaltro/sbt-reactjs/tree/0.4.x) series is for React 0.12
