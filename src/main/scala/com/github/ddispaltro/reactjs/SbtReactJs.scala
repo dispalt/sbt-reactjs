@@ -97,12 +97,12 @@ object SbtReactJs extends AutoPlugin {
       inConfig(Assets)(reactJsScriptUnscopedSettings) ++
       inConfig(TestAssets)(reactJsScriptUnscopedSettings) ++
       Seq(
-        taskMessage in Assets := "ReactJS compiling",
-        taskMessage in TestAssets := "ReactJS test compiling"
+        Assets / taskMessage  := "ReactJS compiling",
+        TestAssets / taskMessage := "ReactJS test compiling"
       )
   ) ++ SbtJsTask.addJsSourceFileTasks(reactJs) ++ Seq(
-    reactJs in Assets := (reactJs in Assets).dependsOn(webModules in Assets, nodeModules in Assets).value,
-    reactJs in TestAssets := (reactJs in TestAssets).dependsOn(webModules in TestAssets, nodeModules in TestAssets).value
+    Assets / reactJs := (Assets / reactJs).dependsOn(Assets / webModules, Assets / nodeModules).value,
+    TestAssets / reactJs := (TestAssets / reactJs).dependsOn(TestAssets / webModules, TestAssets / nodeModules).value
   )
 
 
